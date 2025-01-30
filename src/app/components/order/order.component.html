@@ -1,0 +1,41 @@
+<h2>Current Order</h2>
+
+<div *ngIf="orderItems.length === 0" class="empty-order">
+  <p>The order is empty.</p>
+</div>
+
+<table *ngIf="orderItems.length > 0">
+  <thead>
+    <tr>
+      <th>Product Name</th>
+      <th>Unit Price</th>
+      <th>Quantity</th>
+      <th>Total</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let item of orderItems">
+      <td>{{ item.name }}</td>
+      <td>{{ item.price }}</td>
+      <td>
+        <button (click)="decreaseQuantity(item)">-</button>
+        {{ item.quantity }}
+        <button (click)="increaseQuantity(item)">+</button>
+      </td>
+      <td>${{ item.price * item.quantity }}</td>
+      <td>
+        <button (click)="removeItem(item)">Remove</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="total-price" *ngIf="orderItems.length > 0">
+  <p>Total Price: ${{ getTotalPrice() }}</p>
+</div>
+
+<div class="order-buttons">
+  <button class="place-order" (click)="placeOrder()">Place Order</button>
+  <button class="cancel-order" (click)="cancelOrder()">Cancel Order</button>
+</div>

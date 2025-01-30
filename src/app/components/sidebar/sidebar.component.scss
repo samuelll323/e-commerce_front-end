@@ -1,0 +1,30 @@
+nav {
+  width: 200px;
+  height: 100vh;
+  background: #f4f4f4;
+  padding: 24px;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  margin: 10px 0;
+}
+
+a {
+  text-decoration: none;
+  font-size: 18px;
+  color: #333;
+}
+
+a.hover {
+  color: blue;
+}
+
+.active-link {
+  font-weight: bold;
+  color: blue;
+}

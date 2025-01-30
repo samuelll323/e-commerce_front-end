@@ -1,0 +1,45 @@
+<h2>User Information</h2>
+
+<div class="user-info">
+  <label>First Name:</label>
+  <input [(ngModel)]="user.firstName">
+
+  <label>Last Name:</label>
+  <input [(ngModel)]="user.lastName">
+
+  <label>Email:</label>
+  <input [(ngModel)]="user.email">
+
+  <label>Phone:</label>
+  <input [(ngModel)]="user.phoneNumber">
+
+  <label>Address:</label>
+  <input [(ngModel)]="user.address">
+
+  <button (click)="updateUser()">Update Profile</button>
+</div>
+
+<hr>
+
+<h2>User Orders</h2>
+
+<table *ngIf="user.orders.length > 0; else noOrders">
+  <thead>
+    <tr>
+      <th>Order ID</th>
+      <th>Date</th>
+      <th>Cost</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let order of user.orders">
+      <td>{{ order.id }}</td>
+      <td>{{ order.createdAt | date: 'yyyy-MM-dd HH:mm:ss' }}</td>
+      <td>{{ order.totalPrice }}</td>
+    </tr>
+  </tbody>
+</table>
+
+<ng-template #noOrders>
+  <p>No orders found.</p>
+</ng-template>

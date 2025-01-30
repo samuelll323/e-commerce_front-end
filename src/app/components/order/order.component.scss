@@ -1,0 +1,44 @@
+.empty-order {
+  text-align: center;
+  font-size: 20px;
+  margin-top: 50px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+th, td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: center;
+}
+
+th {
+  background-color: #f4f4f4;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+.order-buttons {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.place-order {
+  background-color: green;
+  color: white;
+  padding: 10px 15px;
+  margin-right: 10px;
+}
+
+.cancel-order {
+  background-color: red;
+  color: white;
+  padding: 10px 15px;
+}

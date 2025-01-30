@@ -1,0 +1,10 @@
+<div *ngIf="!userId">
+  <router-outlet></router-outlet>
+</div>
+
+<div *ngIf="userId" class="container">
+  <app-sidebar [userId]="userId"></app-sidebar>
+  <div class="content">
+    <router-outlet></router-outlet>
+  </div>
+</div>
