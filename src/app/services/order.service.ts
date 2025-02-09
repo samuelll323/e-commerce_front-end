@@ -1,10 +1,18 @@
 import { Injectable } from "@angular/core";
-import { BehaviorSubject, Observable } from "rxjs";
+import {HttpClient, HttpErrorResponse} from "@angular/common/http";
+import {Observable, throwError} from "rxjs";
+import {catchError} from "rxjs/operators";
 
-interface OrderItem {
+export interface Product {
   id: number;
   name: string;
+  description: string;
   price: number;
+  stock: number;
+}
+
+export interface OrderItem {
+  product: Product;
   quantity: number;
 }
 
@@ -13,39 +21,63 @@ interface OrderItem {
 })
 
 export class OrderService {
-  private cartItems: OrderItem[] = [];
-  private cartSubject = new BehaviorSubject<OrderItem[]>(this.cartItems);
+  private apiUrl = 'http://localhost:8080/api/users';
 
-  constructor() {
+  private orderItems: OrderItem[] = [];
+
+  constructor(private http: HttpClient) {
   }
 
-  getCart(): Observable<OrderItem[]> {
-    return this.cartSubject.asObservable();
+  getOrderItems(): OrderItem[] {
+    return this.orderItems;
   }
 
-  addToCart(product: OrderItem): void {
-    const existingItem = this.cartItems.find(item => item.id === product.id);
+  addToOrder(product: Product) {
+    const existingItem = this.orderItems.find(item => item.product.id === product.id);
     if (existingItem) {
       existingItem.quantity++;
     } else {
-      this.cartItems.push({ ...product, quantity: 1});
+      this.orderItems.push({ product, quantity: 1 });
     }
-    this.cartSubject.next(this.cartItems);
   }
 
-  removeFromCart(productId: number): void {
-    this.cartItems = this.cartItems.filter(p => p.id !== productId);
-    this.cartSubject.next(this.cartItems);
+  updateQuantity(productId: number, quantity: number) {
+    this.orderItems = this.orderItems
+      .map(item => item.product.id == productId ? { ...item, quantity } : item)
+      .filter(item => item.quantity > 0);
   }
 
-  placeOrder(userId: number): void {
-    if (this.cartItems.length === 0) {
-      alert("Unable to place an empty order");
-      return;
-    }
-    console.log('Order has been placed', this.cartItems);
-    alert('Order has been placed');
-    this.cartItems = [];
-    this.cartSubject.next(this.cartItems);
+  removeFromOrder(productId: number) {
+    this.orderItems = this.orderItems.filter(item => item.product.id !== productId);
+  }
+
+  cancelOrder() {
+    this.orderItems = [];
+  }
+
+  placeOrder(userId: number): Observable<any> {
+    const orderPayload = {
+      productIds: this.orderItems.reduce((acc, item) => {
+        for (let i = 0; i < item.quantity; i++) {
+          acc.push(item.product.id);
+        }
+        return acc;
+      }, [] as number[]),
+
+      items: this.orderItems.map(item => ({
+        productId: item.product.id,
+        quantity: item.quantity
+      }))
+    };
+
+    console.log("Sending order payload:", orderPayload);
+
+    return this.http.post(`${this.apiUrl}/${userId}/orders`, orderPayload).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  private handleError(error: HttpErrorResponse) {
+    return throwError("An error occurred while processing the order");
   }
 }

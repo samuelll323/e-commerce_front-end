@@ -1,54 +1,74 @@
-import {Component} from "@angular/core";
-
-interface OrderItem {
-  id: number;
-  name: string;
-  price: number;
-  quantity: number;
-}
+import { Component, OnInit } from "@angular/core";
+import { ActivatedRoute } from "@angular/router";
+import { OrderService, OrderItem } from "../../services/order.service";
 
 @Component({
   selector: 'app-order',
   templateUrl: './order.component.html',
   styleUrls: ['./order.component.scss']
 })
+export class OrderComponent implements OnInit {
+  orderItems: OrderItem[] = [];
+  userId!: number;
 
-export class OrderComponent {
-  orderItems: OrderItem[] = [
-    { id: 1, name: 'product1', price: 799, quantity: 1 },
-    { id: 2, name: 'product2', price: 1999, quantity: 2 }
-  ];
-
-  increaseQuantity(item: OrderItem): void {
-    item.quantity++;
+  constructor(private orderService: OrderService, private route: ActivatedRoute) {
   }
 
-  decreaseQuantity(item: OrderItem): void {
-    if (item.quantity > 1) {
-      item.quantity--;
-    } else {
-      this.removeItem(item);
-    }
+  ngOnInit() {
+    this.route.parent?.paramMap.subscribe(params => {
+      const idParam = params.get("id");
+      if (idParam) {
+        this.userId = Number(idParam);
+        if (isNaN(this.userId)) {
+          return;
+        }
+      } else {
+        return;
+      }
+      this.loadOrderItems();
+    });
   }
 
-  removeItem(item: OrderItem): void {
-    this.orderItems = this.orderItems.filter(i => i.id !== item.id);
+  loadOrderItems() {
+    this.orderItems = this.orderService.getOrderItems();
   }
 
-  getTotalPrice(): number {
-    return this.orderItems.reduce((total, item) => total + item.price * item.quantity, 0);
+  increaseQuantity(item: OrderItem) {
+    this.orderService.updateQuantity(item.product.id, item.quantity + 1);
+    this.loadOrderItems();
   }
 
-  placeOrder(): void {
-    if (this.orderItems.length === 0) {
-      alert('The order is empty.')
+  decreaseQuantity(item: OrderItem) {
+    this.orderService.updateQuantity(item.product.id, item.quantity - 1);
+    this.loadOrderItems();
+  }
+
+  removeItem(item: OrderItem) {
+    this.orderService.removeFromOrder(item.product.id);
+    this.loadOrderItems();
+  }
+
+  getTotalPrice() {
+    return this.orderItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  }
+
+  placeOrder() {
+    if (!this.userId) {
+      alert("User ID not found");
       return;
     }
-    alert('Order has been placed');
-    this.orderItems = [];
+
+    console.log("Order items before placing order:", this.orderItems);
+
+    this.orderService.placeOrder(this.userId).subscribe(() => {
+      alert("Order placed successfully");
+      this.orderService.cancelOrder();
+      this.loadOrderItems();
+    });
   }
 
-  cancelOrder(): void {
-    this.orderItems = [];
+  cancelOrder() {
+    this.orderService.cancelOrder();
+    this.loadOrderItems();
   }
 }

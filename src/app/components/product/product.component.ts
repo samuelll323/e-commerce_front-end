@@ -38,6 +38,6 @@ export class ProductComponent implements OnInit{
   }
 
   addToOrder(product: Product): void {
-    this.orderService.addToCart({id: product.id, name: product.name, price: product.price, quantity: 1});
+    this.orderService.addToOrder(product);
   }
 }
