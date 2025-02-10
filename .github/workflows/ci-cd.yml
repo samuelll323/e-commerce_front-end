@@ -1,72 +1,40 @@
-name: Deploy Angular App to AWS ECS
+name: Deploy Angular to AWS S3 🚀
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:
 
-env:
-  AWS_REGION: us-east-2
-  ECR_REPOSITORY: e-commerce-front-end
-  ECS_SERVICE: angular-frontend-service
-  ECS_CLUSTER: ecommerce-frontend
-  ECS_TASK_DEFINITION: angular-frontend-task.json
-  CONTAINER_NAME: angular-frontend
+  workflow_dispatch:
 
 jobs:
   deploy:
-    name: Build and Deploy Angular
+    name: Build & Deploy Angular App
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🚀 Checkout Repository
+      - name: 📥 Checkout Repository
         uses: actions/checkout@v3
 
       - name: ⚙️ Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
 
       - name: 📦 Install Dependencies
         run: npm install
 
       - name: 🏗️ Build Angular App
-        run: npm run build --prod
+        run: npm run build -- --configuration=production
 
-      - name: 🔑 Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: 📤 Deploy to AWS S3
+        uses: jakejarvis/s3-sync-action@master
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          args: --acl public-read --delete
 
-      - name: 🔐 Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-
-      - name: 📦 Build, Tag, and Push Docker Image
-        id: build-image
         env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
-
-      - name: 📝 Fill in New Image ID in ECS Task Definition
-        id: task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ${{ env.ECS_TASK_DEFINITION }}
-          container-name: ${{ env.CONTAINER_NAME }}
-          image: ${{ env.IMAGE_URI }}
-
-      - name: 🚀 Deploy to Amazon ECS
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
-          cluster: ${{ env.ECS_CLUSTER }}
-          service: ${{ env.ECS_SERVICE }}
-          wait-for-service-stability: true
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          SOURCE_DIR: "dist/my-angular-app"
