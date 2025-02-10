@@ -15,7 +15,7 @@ interface Product {
 })
 
 export class ProductService {
-  private apiUrl = 'http://3.144.254.238:8080/api/products';
+  private apiUrl = 'http://3.142.246.198:8080/api/products';
 
   constructor(private http: HttpClient) {
   }
