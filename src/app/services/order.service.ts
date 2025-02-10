@@ -21,7 +21,7 @@ export interface OrderItem {
 })
 
 export class OrderService {
-  private apiUrl = 'http://18.222.69.228:8080/api/users';
+  private apiUrl = 'http://3.136.11.254:8080//api/users';
 
   private orderItems: OrderItem[] = [];
 
