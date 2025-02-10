@@ -1,12 +1,16 @@
-FROM nginx:latest
+FROM node:16-alpine
 
-RUN rm -rf /usr/share/nginx/html/*
+WORKDIR /app
 
-COPY dist/my-angular-app /usr/share/nginx/html
+COPY package.json package-lock.json ./
+RUN npm install --production
 
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY dist/my-angular-app ./dist
+
+RUN npm install -g http-server
 
 EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["http-server", "dist", "-p", "80"]
+
 
